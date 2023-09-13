@@ -93,13 +93,11 @@ def generate_launch_description():
         parameters=[
             {'product_name': 'LDLiDAR_LD19'},
             {'topic_name': 'scan'},
-            {'frame_id': 'base_laser'},
+            {'frame_id': 'laser_frame'},
             {'port_name': '/dev/ttyUSB0'},
             {'port_baudrate': 230400},
-            {'laser_scan_dir': True},
-            {'enable_angle_crop_func': False},
-            {'angle_crop_min': 135.0},
-            {'angle_crop_max': 225.0}
+            {'laser_scan_dir': False},
+            {'enable_angle_crop_func': False}
             ]
     )
 
