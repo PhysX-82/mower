@@ -61,7 +61,7 @@ def generate_launch_description():
 
     diff_drive_spawner = Node(
         package="controller_manager",
-        executable="spawner.py",
+        executable="spawner",
         arguments=["diff_cont"],
     )
 
@@ -74,7 +74,7 @@ def generate_launch_description():
 
     joint_broad_spawner = Node(
         package="controller_manager",
-        executable="spawner.py",
+        executable="spawner",
         arguments=["joint_broad"],
     )
 
@@ -84,6 +84,39 @@ def generate_launch_description():
             on_start=[joint_broad_spawner],
         )
     )
+    # LDROBOT LiDAR publisher node
+    ldlidar_node = Node(
+        package='ldlidar_stl_ros2',
+        executable='ldlidar_stl_ros2_node',
+        name='LD19',
+        output='screen',
+        parameters=[
+            {'product_name': 'LDLiDAR_LD19'},
+            {'topic_name': 'scan'},
+            {'frame_id': 'base_laser'},
+            {'port_name': '/dev/ttyUSB0'},
+            {'port_baudrate': 230400},
+            {'laser_scan_dir': True},
+            {'enable_angle_crop_func': False},
+            {'angle_crop_min': 135.0},
+            {'angle_crop_max': 225.0}
+            ]
+    )
+
+  # base_link to base_laser tf node
+    base_link_to_laser_tf_node = Node(
+        package='tf2_ros',
+        executable='static_transform_publisher',
+        name='base_link_to_base_laser_ld19',
+        arguments=['0','0','0.18','0','0','0','base_link','base_laser']
+    )
+
+
+  # Define LaunchDescription variable
+    ld = LaunchDescription()
+    ld.add_action(ldlidar_node)
+    ld.add_action(base_link_to_laser_tf_node)
+
 
 
     # Code for delaying a node (I haven't tested how effective it is)
@@ -111,5 +144,6 @@ def generate_launch_description():
         twist_mux,
         delayed_controller_manager,
         delayed_diff_drive_spawner,
-        delayed_joint_broad_spawner
+        delayed_joint_broad_spawner,
+        ld
     ])
