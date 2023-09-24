@@ -10,7 +10,10 @@ from launch.substitutions import Command
 from launch.actions import RegisterEventHandler
 from launch.event_handlers import OnProcessStart
 
+
 from launch_ros.actions import Node
+from launch_ros.substitutions import FindPackageShare
+
 
 
 
@@ -28,11 +31,11 @@ def generate_launch_description():
                 )]), launch_arguments={'use_sim_time': 'false', 'use_ros2_control': 'true'}.items()
     )
 
-    # joystick = IncludeLaunchDescription(
-    #             PythonLaunchDescriptionSource([os.path.join(
-    #                 get_package_share_directory(package_name),'launch','joystick.launch.py'
-    #             )])
-    # )
+    joystick = IncludeLaunchDescription(
+                PythonLaunchDescriptionSource([os.path.join(
+                    get_package_share_directory(package_name),'launch','joystick.launch.py'
+                )])
+    )
 
 
     twist_mux_params = os.path.join(get_package_share_directory(package_name),'config','twist_mux.yaml')
@@ -44,11 +47,10 @@ def generate_launch_description():
         )
 
     
-
-
     robot_description = Command(['ros2 param get --hide-type /robot_state_publisher robot_description'])
 
     controller_params_file = os.path.join(get_package_share_directory(package_name),'config','my_controllers.yaml')
+
 
     controller_manager = Node(
         package="controller_manager",
@@ -96,7 +98,7 @@ def generate_launch_description():
             {'frame_id': 'laser_frame'},
             {'port_name': '/dev/ttyUSB0'},
             {'port_baudrate': 230400},
-            {'laser_scan_dir': False},
+            {'laser_scan_dir': True},
             {'enable_angle_crop_func': False}
             ]
     )
@@ -106,7 +108,7 @@ def generate_launch_description():
         package='tf2_ros',
         executable='static_transform_publisher',
         name='base_link_to_base_laser_ld19',
-        arguments=['0','0','0.18','0','0','0','base_link','base_laser']
+        arguments=['0','0','0.18','0','0','0','base_link','laser_frame']
     )
 
 
@@ -116,29 +118,10 @@ def generate_launch_description():
     ld.add_action(base_link_to_laser_tf_node)
 
 
-
-    # Code for delaying a node (I haven't tested how effective it is)
-    # 
-    # First add the below lines to imports
-    # from launch.actions import RegisterEventHandler
-    # from launch.event_handlers import OnProcessExit
-    #
-    # Then add the following below the current diff_drive_spawner
-    # delayed_diff_drive_spawner = RegisterEventHandler(
-    #     event_handler=OnProcessExit(
-    #         target_action=spawn_entity,
-    #         on_exit=[diff_drive_spawner],
-    #     )
-    # )
-    #
-    # Replace the diff_drive_spawner in the final return with delayed_diff_drive_spawner
-
-
-
     # Launch them all!
     return LaunchDescription([
         rsp,
-        # joystick,
+        joystick,
         twist_mux,
         delayed_controller_manager,
         delayed_diff_drive_spawner,
