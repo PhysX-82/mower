@@ -24,7 +24,7 @@ diff_cont:
     use_stamped_vel: false
 
     open_loop: true
-    position_feedback: false
+    position_feedback: true
 
     # wheels_per_side: x
     # wheel_separation_multiplier: x
